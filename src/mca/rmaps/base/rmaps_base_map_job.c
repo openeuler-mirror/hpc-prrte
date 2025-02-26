@@ -327,6 +327,13 @@ void prte_rmaps_base_map_job(int fd, short args, void *cbdata)
                         inherit ? "TRUE" : "FALSE",
                         options.use_hwthreads ? "TRUE" : "FALSE");
 
+    if ((PRTE_MAPPING_GIVEN & PRTE_GET_MAPPING_DIRECTIVE(prte_rmaps_base.mapping)) &&
+        PRTE_MAPPING_BYUSER == PRTE_GET_MAPPING_POLICY(prte_rmaps_base.mapping) &&
+        (PRTE_MAPPING_GIVEN & PRTE_GET_MAPPING_DIRECTIVE(jdata->map->mapping)) &&
+        PRTE_MAPPING_BYL3CACHE == PRTE_GET_MAPPING_POLICY(jdata->map->mapping)) {
+        jdata->map->mapping = 0;
+    }
+
     /* set the default mapping policy IFF it wasn't provided */
     if (!PRTE_MAPPING_POLICY_IS_SET(jdata->map->mapping)) {
         did_map = false;
