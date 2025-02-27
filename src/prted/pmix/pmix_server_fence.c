@@ -76,6 +76,7 @@ static void pmix_server_release(int status, pmix_data_buffer_t *buf, void *cbdat
     PMIX_RELEASE(cd);
 }
 
+static __thread int coll_id = 0;
 /* this function is called when all the local participants have
  * called fence - thus, the collective is already locally
  * complete at this point. We therefore just need to create the
@@ -105,6 +106,7 @@ pmix_status_t pmix_server_fencenb_fn(const pmix_proc_t procs[], size_t nprocs,
         cd->sig->sz = nprocs;
         cd->sig->signature = (pmix_proc_t *) malloc(cd->sig->sz * sizeof(pmix_proc_t));
         memcpy(cd->sig->signature, procs, cd->sig->sz * sizeof(pmix_proc_t));
+        cd->sig->coll_id = coll_id++;
     }
 
     rc = prte_pack_ctrl_options(&cd->ctrls, info, ninfo);

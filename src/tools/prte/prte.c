@@ -453,6 +453,13 @@ int main(int argc, char *argv[])
             return rc;
         }
     }
+	
+    donau_launch_exec = getenv("OMPI_MCA_plm_rsh_agent");
+    if (NULL != donau_launch_exec && (NULL != strstr(donau_launch_exec, "ssh") || 
+        strstr(donau_launch_exec, "dstart"))) {
+        prte_donau_launch_type = DONAU_SSH;
+    }
+	
     // check if they asked for XML output from us
     opt = pmix_cmd_line_get_param(&results, PRTE_CLI_OUTPUT);
     if (NULL != opt) {

@@ -142,6 +142,10 @@ PRTE_EXPORT extern int prte_clean_output;
 /* define a default error return code for PRTE */
 #define PRTE_ERROR_DEFAULT_EXIT_CODE 1
 
+/* define the default length of nodename and nodelist about donau */
+#define DONAU_MAX_NODENAME_LENGTH 63
+#define DONAU_MAX_NODELIST_LENGTH 36000
+
 /**
  * Define a macro for updating the prte_exit_status
  * The macro provides a convenient way of doing this
@@ -626,6 +630,17 @@ PMIX_EXPORT void prte_hide_unused_params(int x, ...);
 #else
 #define PRTE_HIDE_UNUSED_PARAMS(...)
 #endif
+
+/* flag about donau launch: DONAU_SSH - ssh/dstart
+ *                          DONAU_DRUN - drun(default) */
+__prte_attribute_visibility__("default") extern int prte_donau_launch_type;
+enum {
+    DONAU_SSH = 0,
+    DONAU_DRUN = 1
+};
+
+/* exec path about drun/start from DONAU */
+__prte_attribute_visibility__("default") extern char *donau_launch_exec;
 
 END_C_DECLS
 

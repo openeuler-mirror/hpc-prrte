@@ -65,6 +65,7 @@ typedef struct {
     pmix_object_t super;
     pmix_proc_t *signature;
     size_t sz;
+    size_t coll_id;
 } prte_grpcomm_signature_t;
 PRTE_EXPORT PMIX_CLASS_DECLARATION(prte_grpcomm_signature_t);
 

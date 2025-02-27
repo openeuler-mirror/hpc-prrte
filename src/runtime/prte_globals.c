@@ -172,6 +172,13 @@ bool prte_execute_quiet = false;
 bool prte_report_silent_errors = false;
 bool prte_hwloc_shmem_available = false;
 
+/* flag about donau launch: DONAU_SSH - ssh/dstart
+ *                          DONAU_DRUN - drun(default) */
+int prte_donau_launch_type = DONAU_DRUN;
+
+/* exec path about drun/start from DONAU */
+char *donau_launch_exec = NULL;
+
 /* See comment in src/tools/prun/debuggers.c about this MCA
    param */
 bool prte_in_parallel_debugger = false;
