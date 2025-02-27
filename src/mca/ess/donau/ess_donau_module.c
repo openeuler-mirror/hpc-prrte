@@ -30,7 +30,7 @@
 #include "src/mca/ess/donau/ess_donau.h"
 
 static int donau_set_name(void);
-static int rte_init(void);
+static int rte_init(int argc, char **argv);
 static int rte_finalize(void);
 
 prte_ess_base_module_t prte_ess_donau_module = {
@@ -38,10 +38,11 @@ prte_ess_base_module_t prte_ess_donau_module = {
     rte_finalize,
 };
 
-static int rte_init(void)
+static int rte_init(int argc, char **argv)
 {
     int ret;
     char *error = NULL;
+    PRTE_HIDE_UNUSED_PARAMS(argc, argv);
 
     /* run the prolog */
     if (PRTE_SUCCESS != (ret = prte_ess_base_std_prolog())) {

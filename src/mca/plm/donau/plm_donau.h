@@ -15,6 +15,10 @@
 
 #include "src/mca/mca.h"
 #include "src/mca/plm/plm.h"
+#include "src/mca/oob/base/base.h"
+#include "src/mca/plm/base/base.h"
+#include "src/util/pmix_path.h"
+#include "src/util/pmix_basename.h"
 BEGIN_C_DECLS
 
 struct prte_mca_plm_donau_component_t {
