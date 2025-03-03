@@ -203,10 +203,6 @@ static void launch_daemons(int fd, short args, void *cbdata)
         return;
     }
 
-    // OPAL_OUTPUT_VERBOSE((1, orte_plm_base_framework.framework_output,
-    //                      "%s plm:donau: launching vm",
-    //                      ORTE_NAME_PRINT(ORTE_PROC_MY_NAME)));
-
     /* get the map for the job */
     if (NULL == (map = daemons->map)) {
         PRTE_ERROR_LOG(PRTE_ERR_NOT_FOUND);

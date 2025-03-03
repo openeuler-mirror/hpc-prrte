@@ -504,7 +504,19 @@ int main(int argc, char *argv[])
     PRTE_RML_RECV(PRTE_NAME_WILDCARD, PRTE_RML_TAG_PRTED_CALLBACK,
                   PRTE_RML_PERSISTENT, rollup, NULL);
 
-    if (prte_static_ports || NULL != prte_parent_uri) {
+    char *donau_job_id = getenv("CCS_JOB_ID");
+    donau_launch_exec = getenv("OMPI_MCA_plm_rsh_agent");
+    if (NULL != donau_launch_exec && (NULL != strstr(donau_launch_exec, "ssh") || 
+        strstr(donau_launch_exec, "dstart"))) {
+        prte_donau_launch_type = DONAU_SSH;
+    }
+
+    int is_simp = (NULL != donau_job_id &&
+        0 != strlen(donau_job_id) &&
+        DONAU_DRUN == prte_donau_launch_type);
+
+    if(!is_simp &&
+        (prte_static_ports || NULL != prte_parent_uri)) {
         /* since we will be waiting for any children to send us
          * their rollup info before sending to our parent, save
          * a little time in the launch phase by "warming up" the
