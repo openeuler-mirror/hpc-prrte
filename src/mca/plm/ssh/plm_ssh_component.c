@@ -159,6 +159,9 @@ static int ssh_component_register(void)
 
     /* local ssh/ssh launch agent */
     prte_mca_plm_ssh_component.agent = "ssh : rsh";
+    if (getenv("OMPI_MCA_plm_rsh_agent")) {
+        prte_mca_plm_ssh_component.agent = getenv("OMPI_MCA_plm_rsh_agent");
+    }
     var_id = pmix_mca_base_component_var_register(c, "agent",
                                                   "The command used to launch executables on remote nodes (typically \"ssh\")",
                                                   PMIX_MCA_BASE_VAR_TYPE_STRING,
