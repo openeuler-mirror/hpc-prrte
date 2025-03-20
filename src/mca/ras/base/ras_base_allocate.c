@@ -326,6 +326,46 @@ void prte_ras_base_display_cpus(prte_job_t *jdata, char *nodelist)
     PMIX_ARGV_FREE_COMPAT(nodes);
 }
 
+static void get_alloc(char *alloc_path, pmix_list_t *nodes)
+{
+    prte_node_t *node = NULL;
+    FILE *fp;
+    fp = fopen(alloc_path, "r");
+    if (NULL == fp) {
+        return;
+    }
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    while ((read = getline(&line, &len, fp)) != -1) {
+        char hostname[DONAU_MAX_NODENAME_LENGTH] = {0};
+        int num_kernels = 0;
+        int slots = 0;
+        if (sscanf(line, "%s %d %d", hostname, &num_kernels, &slots) != 3) {
+            PMIX_OUTPUT_VERBOSE((10, prte_ras_base_framework.framework_output,
+                                "ras/donau: Get the wrong num of params in CCS_ALLOC_FILE"));
+            break;
+        }
+ 
+        node = PMIX_NEW(prte_node_t);
+        node->name = strdup(hostname);
+        // Strip off the FQDN if present, ignore IP addresses
+        if (!prte_keep_fqdn_hostnames && !pmix_net_isaddr(node->name)) {
+            char *ptr;
+            if (NULL != (ptr = strchr(node->name, '.'))) {
+                *ptr = '\0';
+            }
+        }
+        node->state = PRTE_NODE_STATE_UP;
+        node->slots_inuse = 0;
+        node->slots_max = 0;
+        node->slots = slots;
+        pmix_list_append(nodes, &node->super);
+    }
+    free(line);
+    fclose(fp);
+    return;
+}
 
 /*
  * Function for selecting one component from all those that are
@@ -554,6 +594,35 @@ void prte_ras_base_allocate(int fd, short args, void *cbdata)
          */
         if (PRTE_SUCCESS != (rc = prte_ras_base_node_insert(&nodes, jdata))) {
             PRTE_ERROR_LOG(rc);
+            PRTE_ACTIVATE_JOB_STATE(jdata, PRTE_JOB_STATE_ALLOC_FAILED);
+            PMIX_RELEASE(caddy);
+            return;
+        }
+        /* cleanup */
+        PMIX_DESTRUCT(&nodes);
+        goto DISPLAY;
+    }
+
+    char *alloc_path = NULL;
+    if (NULL != (alloc_path = getenv("CCS_ALLOC_FILE")) && DONAU_SSH == prte_donau_launch_type) {
+        get_alloc(alloc_path, &nodes);
+    }
+ 
+    /* if something was found in the hostfiles(s), we use that as our global
+     * pool - set it and we are done
+     */
+    if (!pmix_list_is_empty(&nodes)) {
+        /* flag that the allocation is managed */
+        prte_managed_allocation = true;
+        /* since it is managed, we do not attempt to resolve
+         * the nodenames */
+        prte_do_not_resolve = true;
+        /* store the results in the global resource pool - this removes the
+         * list items
+         */
+        if (PRTE_SUCCESS != (rc = prte_ras_base_node_insert(&nodes, jdata))) {
+            PRTE_ERROR_LOG(rc);
+            PMIX_DESTRUCT(&nodes);
             PRTE_ACTIVATE_JOB_STATE(jdata, PRTE_JOB_STATE_ALLOC_FAILED);
             PMIX_RELEASE(caddy);
             return;
